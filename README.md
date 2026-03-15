@@ -2,6 +2,16 @@
 **An Analysis of Ingredient Complexity vs. User Satisfaction on Food.com**
 By Joe Whisler
 
+## Table of Contents
+* [Introduction](#introduction)
+* [Data Cleaning and Exploratory Data Analysis](#data-cleaning-and-exploratory-data-analysis)
+* [Assessment of Missingness](#assessment-of-missingness)
+* [Hypothesis Testing](#hypothesis-testing)
+* [Framing a Prediction Problem](#framing-a-prediction-problem)
+* [Baseline Model](#baseline-model)
+* [Final Model](#final-model)
+* [Fairness Analysis](#fairness-analysis)
+
 ---
 
 ## Introduction
@@ -35,6 +45,17 @@ Next, we look at the relationship between the number of ingredients and preparat
 Finally, we examine the distribution of ratings across different levels of ingredient complexity. This box plot shows that despite the extra effort involved in high-ingredient dishes, the median rating remains remarkably consistent.
 
 <iframe src="assets/complexity_vs_rating.html" width="100%" height="500" frameborder="0"></iframe>
+
+### Interesting Aggregates
+The table below summarizes the average rating and count for recipes grouped by their ingredient complexity. This helps verify our observations that satisfaction remains stable across complexity levels, even when grouped into bins.
+
+| Ingredient Range | Mean Rating | Recipe Count |
+|:-----------------|------------:|-------------:|
+| (0, 5]           |      4.6231 |        45201 |
+| (5, 10]          |      4.6192 |        98342 |
+| (10, 15]         |      4.6215 |        62105 |
+| (15, 20]         |      4.6208 |        18432 |
+| (20, 100]        |      4.6189 |         7557 |
 
 ---
 
