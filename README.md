@@ -88,7 +88,7 @@ We improved the model by adding `calories` and `ingred_per_step` (Preparation De
 
 - **Improvements:** We utilized **GridSearchCV** to find the optimal hyperparameters: `{'clf__max_depth': None, 'clf__n_estimators': 50}`.
 - **Balancing:** We set `class_weight='balanced'` to force the model to pay more attention to the 1, 2, and 3-star classes.
-- **Results:** The final model achieved a Weighted F1-Score of **0.58**. This represents a meaningful improvement over the baseline, as the model began to better differentiate between 4 and 5-star ratings.
+- **Results:** The final model achieved a Weighted F1-Score of **0.58**. While the Weighted F1-Score improved by a modest 0.0127, this represents a significant shift in model behavior. By utilizing balanced class weights, the model moved away from a 'majority-rule' bias and began demonstrating actual predictive power for 4-star recipes, which the baseline model largely ignored.
 
 ---
 
