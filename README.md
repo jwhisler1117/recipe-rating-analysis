@@ -16,6 +16,7 @@ Understanding this relationship is vital for home cooks who often equate "more i
 ---
 
 ## Data Cleaning and Exploratory Data Analysis
+
 ### Data Cleaning
 To ensure the data was ready for analysis, we performed the following:
 1. **Handling Missing Ratings:** We replaced ratings of `0` with `NaN`, as a zero typically represents a comment without a star rating.
@@ -23,68 +24,81 @@ To ensure the data was ready for analysis, we performed the following:
 3. **Feature Engineering:** We extracted `calories` from the nutrition string and created an `ingred_per_step` column to measure "preparation density."
 
 ### Exploratory Data Analysis
-Below is the distribution of average ratings. Note the heavy right-skew; most recipes on Food.com are highly rated.
+Below is the distribution of average ratings. Note the heavy right-skew; most recipes on Food.com are highly rated, indicating a general "optimism bias" among users.
 
 <iframe src="assets/rating_dist.html" width="100%" height="500" frameborder="0"></iframe>
 
-Next, we look at the relationship between the number of ingredients and preparation time. As expected, more ingredients generally lead to longer cooking times.
+Next, we look at the relationship between the number of ingredients and preparation time. As shown by the teal scatter plot and OLS trendline, more ingredients generally correlate with longer preparation times.
 
 <iframe src="assets/ingredients_vs_time.html" width="100%" height="500" frameborder="0"></iframe>
 
-Finally, we examine the distribution of ratings across different levels of ingredient complexity. This box plot shows that the median rating remains consistent regardless of the number of ingredients.
+Finally, we examine the distribution of ratings across different levels of ingredient complexity. This box plot shows that despite the extra effort involved in high-ingredient dishes, the median rating remains remarkably consistent.
 
 <iframe src="assets/complexity_vs_rating.html" width="100%" height="500" frameborder="0"></iframe>
+
 ---
 
 ## Assessment of Missingness
-We believe the `rating` column may be **NMAR (Not Missing At Random)**. Users may be less likely to leave a star rating if they found the recipe so confusing they couldn't finish it, or if they only intended to leave a specific comment about a substitution.
+
+We believe the `rating` column may be **NMAR (Not Missing At Random)**. Users may be less likely to leave a star rating if they found the recipe unremarkable or if they only intended to leave a specific comment about a substitution. 
 
 To check for **MAR (Missing At Random)**, we ran a permutation test to see if missingness in ratings depended on the `minutes` (cooking time). 
-- **Result:** [Insert your P-Value here from Step 3 code]
-- **Conclusion:** If $p < 0.05$, the missingness depends on cooking time.
+
+- **Result:** The P-Value was **0.0**.
+- **Conclusion:** Since $p < 0.05$, we reject the null hypothesis. The missingness of ratings **is dependent** on the cooking time, suggesting the data is Missing at Random (MAR) with respect to `minutes`.
 
 ---
 
 ## Hypothesis Testing
+
 **Null Hypothesis:** Simple recipes (≤10 ingredients) and complex recipes (>10 ingredients) have the same mean rating.
 **Alternative Hypothesis:** Simple recipes have a different mean rating than complex recipes.
 
 - **Test Statistic:** Difference in Means (Simple - Complex).
 - **Observed Difference:** -0.0021
-- **P-Value:** 0.6440
+- **P-Value:** 0.456
 - **Conclusion:** We fail to reject the null hypothesis. There is no significant evidence that ingredient count affects the average rating.
 
 ---
 
 ## Framing a Prediction Problem
+
 **Prediction Problem:** Predict the star rating (1-5) for a recipe.
 **Type:** Multiclass Classification.
 **Response Variable:** `avg_rating` (rounded to the nearest integer).
-**Evaluation Metric:** **Weighted F1-Score**. This metric was chosen because of the heavy class imbalance (mostly 5-star ratings).
+**Evaluation Metric:** **Weighted F1-Score**. 
+
+We chose this metric because of the heavy class imbalance (roughly 70% of the data is 5-star). Accuracy would reward a model for simply guessing "5" every time, whereas a Weighted F1-Score requires the model to correctly identify the rarer low-rating classes.
 
 ---
 
 ## Baseline Model
+
 Our baseline model used a **Random Forest Classifier** with two features: `n_ingredients` and `minutes`.
-- **Quantitative Features:** 2
-- **Performance:** Weighted F1-Score of [Insert Baseline F1].
-- **Assessment:** The model struggled due to class imbalance, often defaulting to 5-star predictions.
+
+- **Pre-processing:** We used `StandardScaler` within a `Pipeline` to ensure both features were treated with equal weight by the algorithm.
+- **Performance:** Weighted F1-Score of **0.5673**.
+- **Assessment:** The model struggled due to class imbalance, frequently defaulting to 5-star predictions as it failed to capture the nuances of lower-rated recipes.
 
 ---
 
 ## Final Model
-We improved the model by adding `calories` and `ingred_per_step` (Complexity Density). We also used `class_weight='balanced'` to force the model to pay attention to lower-rated recipes.
-- **Added Features:** `calories`, `n_steps`, `ingred_per_step`.
-- **Hyperparameters:** Tuned via `GridSearchCV` (Optimal depth: [Insert Max Depth]).
-- **Improvement:** The model showed a [X]% increase in F1-score and improved precision for 4-star ratings.
+
+We improved the model by adding `calories` and `ingred_per_step` (Preparation Density). We hypothesized that the ratio of ingredients to steps would better reflect the "effort-to-reward" ratio perceived by the user.
+
+- **Improvements:** We utilized **GridSearchCV** to find the optimal hyperparameters: `{'clf__max_depth': None, 'clf__n_estimators': 50}`.
+- **Balancing:** We set `class_weight='balanced'` to force the model to pay more attention to the 1, 2, and 3-star classes.
+- **Results:** The final model achieved a Weighted F1-Score of **0.58**. This represents a meaningful improvement over the baseline, as the model began to better differentiate between 4 and 5-star ratings.
 
 ---
 
 ## Fairness Analysis
+
 We tested our model's fairness between **Simple Recipes** (≤10 ingredients) and **Complex Recipes** (>10 ingredients).
+
 - **Metric:** Weighted Precision.
-- **Null Hypothesis:** The model is fair; precision is equal for both groups.
+- **Null Hypothesis:** The model is fair; its precision is equal for both groups.
 - **P-Value:** 0.2640
-- **Conclusion:** Since $p > 0.05$, we fail to reject the null hypothesis, suggesting the model is fair across complexity levels.
+- **Conclusion:** Since $p > 0.05$, we fail to reject the null hypothesis, suggesting the model performs consistently across both levels of complexity.
 
 <iframe src="assets/fairness_test.html" width="100%" height="500" frameborder="0"></iframe>
