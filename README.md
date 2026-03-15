@@ -31,6 +31,9 @@ Next, we look at the relationship between the number of ingredients and preparat
 
 <iframe src="assets/ingredients_vs_time.html" width="100%" height="500" frameborder="0"></iframe>
 
+Finally, we examine the distribution of ratings across different levels of ingredient complexity. This box plot shows that the median rating remains consistent regardless of the number of ingredients.
+
+<iframe src="assets/complexity_vs_rating.html" width="100%" height="500" frameborder="0"></iframe>
 ---
 
 ## Assessment of Missingness
